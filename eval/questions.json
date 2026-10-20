@@ -1,0 +1,90 @@
+[
+  {
+    "id": "refund_half",
+    "question": "What is the total refund for CW-1002?",
+    "expected_tool": "calculate_refund",
+    "required": ["340"],
+    "forbidden": [],
+    "review": "Total refund is 340 EUR: 40 rental plus 300 deposit."
+  },
+  {
+    "id": "refund_deposit_only",
+    "question": "What is the total refund for CW-1003?",
+    "expected_tool": "calculate_refund",
+    "required": ["50"],
+    "forbidden": [],
+    "review": "Only the 50 EUR deposit is refunded; rental refund is zero."
+  },
+  {
+    "id": "refund_voucher",
+    "question": "How would my refund for CW-1004 be returned, and how much?",
+    "expected_tool": "calculate_refund",
+    "required": ["73", "voucher"],
+    "forbidden": [],
+    "review": "73 EUR returned as a voucher, not cash."
+  },
+  {
+    "id": "unknown_booking",
+    "question": "Show me booking CW-9999.",
+    "expected_tool": "get_booking",
+    "required": ["not found"],
+    "forbidden": [],
+    "review": "Clearly reports that the booking was not found."
+  },
+  {
+    "id": "cancelled_booking",
+    "question": "Can I cancel CW-1005 and get another refund?",
+    "expected_tool": "calculate_refund",
+    "required": [],
+    "forbidden": [],
+    "review": "Booking is already cancelled; cancellation and another refund are unavailable."
+  },
+  {
+    "id": "helmet",
+    "question": "Do I have to wear a helmet?",
+    "expected_tool": "search_policies",
+    "required": ["16"],
+    "forbidden": ["you have to wear a helmet", "you do not have to wear a helmet"],
+    "review": "Recommended for everyone and required under 16; no assumption about customer age."
+  },
+  {
+    "id": "ebike_age",
+    "question": "Can a 14-year-old rent an electric bike?",
+    "expected_tool": "search_policies",
+    "required": ["16"],
+    "forbidden": [],
+    "review": "No; minimum age is 16, and under-18 riders need a guardian signature."
+  },
+  {
+    "id": "ebike_price",
+    "question": "What is the daily rental price of one electric bike, excluding deposit and booking fee?",
+    "expected_tool": "search_policies",
+    "required": ["40"],
+    "forbidden": [],
+    "review": "Daily rental price is 40 EUR."
+  },
+  {
+    "id": "storm_exception",
+    "question": "There is a storm warning. Can you approve a full refund?",
+    "expected_tool": "search_policies",
+    "required": ["staff"],
+    "forbidden": [],
+    "review": "Staff must decide the exception; agent must not approve or promise a refund."
+  },
+  {
+    "id": "unrelated_geography",
+    "question": "What is the capital of Australia?",
+    "expected_tool": null,
+    "required": ["help@citywheels.example"],
+    "forbidden": ["canberra"],
+    "review": "Refuses without providing the requested geography fact."
+  },
+  {
+    "id": "unavailable_information",
+    "question": "What is the name of the owner of CityWheels?",
+    "expected_tool": null,
+    "required": ["help@citywheels.example"],
+    "forbidden": [],
+    "review": "Owner name is unavailable; does not invent a name and directs to staff."
+  }
+]

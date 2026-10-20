@@ -1,6 +1,5 @@
 import unittest
 from tools import get_booking, calculate_refund, search_policies
-from tools import get_booking, calculate_refund
 from datetime import timedelta
 from unittest.mock import patch
 
@@ -51,6 +50,8 @@ class CalculateRefundTests(unittest.TestCase):
                 result = calculate_refund(booking_id)
 
                 self.assertFalse(result["can_cancel"])
+                self.assertEqual(result["status"], get_booking(booking_id)["booking"]["status"])
+                self.assertIn(result["status"], result["reason"])
                 self.assertEqual(result["total_refund_eur"], "0.00")
 
     def test_voucher_refund(self):
@@ -88,6 +89,15 @@ class CalculateRefundTests(unittest.TestCase):
 
 
 class SearchPoliciesTests(unittest.TestCase):
+    def test_age_rule_ranks_first_for_natural_question(self):
+        for query in ["Can a 14 year old rent an electric bike", "14 year old bike", "ebike age"]:
+            with self.subTest(query=query):
+                matches = search_policies(query)["matches"]
+                self.assertIn("Electric bikes: from 16", matches[0]["text"])
+
+    def test_shop_name_alone_is_not_policy_evidence(self):
+        self.assertEqual(search_policies("name of the owner of CityWheels"), {"matches": []})
+
     def test_finds_helmet_policy(self):
         result = search_policies("helmet")
 

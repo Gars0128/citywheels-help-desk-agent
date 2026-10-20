@@ -19,6 +19,20 @@ def run_agent(question: str, model, max_steps: int = 8) -> str:
         response = model.respond(messages)
 
         if response["type"] == "final":
+            has_tool_result = any(
+                message["role"] == "tool"
+                and json.loads(message["content"]) != {"matches": []}
+                for message in messages
+            )
+
+            if not has_tool_result:
+                return (
+                    "I can only answer CityWheels questions using "
+                    "the shop's policies and booking data. "
+                    "Please provide a booking ID for booking questions, "
+                    "or contact help@citywheels.example."
+                )
+
             return response["content"]
 
         if response["type"] != "tool_call":

@@ -72,3 +72,21 @@ class AgentLimitTests(unittest.TestCase):
 
         self.assertEqual(model.calls, 3)
         self.assertIn("contact CityWheels staff", answer)          
+
+class UnsupportedAnswerModel:
+    def respond(self, messages):
+        return {
+            "type": "final",
+            "content": "The capital of Australia is Canberra.",
+        }
+
+
+class AgentGroundingTests(unittest.TestCase):
+    def test_blocks_answer_without_tool_results(self):
+        answer = run_agent(
+            "What is the capital of Australia?",
+            UnsupportedAnswerModel(),
+        )
+
+        self.assertNotIn("Canberra", answer)
+        self.assertIn("help@citywheels.example", answer)       
