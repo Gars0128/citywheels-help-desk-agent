@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from agent import run_agent
@@ -6,6 +7,28 @@ from ollama_model import OllamaModel
 
 
 ROOT = Path(__file__).resolve().parent
+
+
+def check_answer(case, answer, tool_calls):
+    """Partial checks only: matching these patterns cannot prove factual correctness."""
+    normalized = answer.casefold()
+    failures = []
+    for text in case["required"]:
+        if text.casefold() not in normalized:
+            failures.append(f"Missing required text: {text}")
+    for text in case["forbidden"]:
+        if text.casefold() in normalized:
+            failures.append(f"Contains forbidden text: {text}")
+    for pattern in case.get("required_patterns", []):
+        if not re.search(pattern, answer, re.IGNORECASE):
+            failures.append(f"Missing required meaning pattern: {pattern}")
+    for pattern in case.get("forbidden_patterns", []):
+        if re.search(pattern, answer, re.IGNORECASE):
+            failures.append(f"Contains forbidden claim: {pattern}")
+    expected_tool = case["expected_tool"]
+    if expected_tool and expected_tool not in tool_calls:
+        failures.append(f"Expected tool not called: {expected_tool}")
+    return failures
 
 
 class TrackedModel:
@@ -42,20 +65,7 @@ def main():
 
         try:
             answer = run_agent(case["question"], model)
-            normalized = answer.casefold()
-
-            for text in case["required"]:
-                if text.casefold() not in normalized:
-                    failures.append(f"Missing required text: {text}")
-
-            for text in case["forbidden"]:
-                if text.casefold() in normalized:
-                    failures.append(f"Contains forbidden text: {text}")
-
-            expected_tool = case["expected_tool"]
-
-            if expected_tool and expected_tool not in model.tool_calls:
-                failures.append(f"Expected tool not called: {expected_tool}")
+            failures.extend(check_answer(case, answer, model.tool_calls))
 
         except Exception as error:
             answer = ""
@@ -91,7 +101,8 @@ def main():
     report.insert(5, "")
 
     output = ROOT / "eval" / "results.md"
-    output.write_text("\n".join(report), encoding="utf-8")
+    report_text = re.sub(r"[ \t]+$", "", "\n".join(report), flags=re.MULTILINE)
+    output.write_text(report_text + "\n", encoding="utf-8")
 
     print(f"\nAutomated checks passed: {passed}/{len(questions)}")
     print(f"Report saved to: {output}")

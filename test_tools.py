@@ -1,9 +1,9 @@
 import unittest
-from tools import get_booking, calculate_refund, search_policies
 from datetime import timedelta
 from unittest.mock import patch
 
-from tools import CURRENT_TIME
+from tools import CURRENT_TIME, calculate_refund, get_booking, search_policies
+
 
 class GetBookingTests(unittest.TestCase):
     def test_existing_booking(self):

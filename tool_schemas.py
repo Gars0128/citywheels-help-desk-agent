@@ -29,8 +29,9 @@ TOOL_SCHEMAS = [
         "function": {
             "name": "calculate_refund",
             "description": (
-                "Calculate the cancellation refund for a booking now. "
-                "Use this tool for all booking refund amounts. "
+                "Check cancellation eligibility and calculate the refund now. "
+                "Use for all booking refund questions, including whether a "
+                "cancelled booking qualifies for another refund. "
                 "It only calculates a refund; it does not cancel the booking."
             ),
             "parameters": {
@@ -58,6 +59,8 @@ TOOL_SCHEMAS = [
                 "or requires, including storm-warning refund exceptions. "
                 "Use concise English keywords because the policy "
                 "documents are in English."
+                " Include the topic and constraint, e.g. 'electric bike age limits' "
+                "for an age eligibility question."
             ),
             "parameters": {
                 "type": "object",

@@ -21,13 +21,15 @@
     "expected_tool": "calculate_refund",
     "required": ["73", "voucher"],
     "forbidden": [],
+    "forbidden_patterns": ["(?:sent|send|delivered|deliver|emailed).{0,35}(?:email|account)|(?:email|account).{0,35}(?:sent|delivered)"],
     "review": "73 EUR returned as a voucher, not cash."
   },
   {
     "id": "unknown_booking",
     "question": "Show me booking CW-9999.",
     "expected_tool": "get_booking",
-    "required": ["not found"],
+    "required": [],
+    "required_patterns": ["not found|could(?: not|n't) find|does not exist|no booking"],
     "forbidden": [],
     "review": "Clearly reports that the booking was not found."
   },
@@ -35,7 +37,9 @@
     "id": "cancelled_booking",
     "question": "Can I cancel CW-1005 and get another refund?",
     "expected_tool": "calculate_refund",
-    "required": [],
+    "required": ["cancelled"],
+    "required_patterns": ["cannot|can't|no (?:additional|further|another)|not eligible"],
+    "forbidden_patterns": ["is (?:a )?confirmed booking|can cancel (?:this|the|your) booking", "refunds?[^.!?]*automatic|automatic[^.!?]*refund"],
     "forbidden": [],
     "review": "Booking is already cancelled; cancellation and another refund are unavailable."
   },
@@ -43,7 +47,7 @@
     "id": "helmet",
     "question": "Do I have to wear a helmet?",
     "expected_tool": "search_policies",
-    "required": ["16"],
+    "required": ["16", "recommend", "required"],
     "forbidden": ["you have to wear a helmet", "you do not have to wear a helmet"],
     "review": "Recommended for everyone and required under 16; no assumption about customer age."
   },
@@ -51,7 +55,9 @@
     "id": "ebike_age",
     "question": "Can a 14-year-old rent an electric bike?",
     "expected_tool": "search_policies",
-    "required": ["16"],
+    "required": ["16", "18"],
+    "required_patterns": ["\\bno\\b|cannot|can't|minimum age|at least 16|from 16|16 or older", "parent|guardian"],
+    "forbidden_patterns": ["14.year.old can rent|no (?:specific )?age restriction|no minimum age"],
     "forbidden": [],
     "review": "No; minimum age is 16, and under-18 riders need a guardian signature."
   },
@@ -69,6 +75,7 @@
     "expected_tool": "search_policies",
     "required": ["staff"],
     "forbidden": [],
+    "forbidden_patterns": ["I (?:have )?approv(?:e|ed)|refund is guaranteed|guaranteed full refund"],
     "review": "Staff must decide the exception; agent must not approve or promise a refund."
   },
   {

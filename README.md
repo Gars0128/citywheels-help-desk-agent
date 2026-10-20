@@ -1,6 +1,6 @@
 # CityWheels help desk — base data
 
-CityWheels is a made-up bike rental shop. These files hold the data for its help desk agent. There is no code here: you write it.
+CityWheels is a made-up bike rental shop. These files hold the data for its help desk agent. The Python implementation uses local Ollama tool calling; see [SOLUTION.md](SOLUTION.md) for installation, commands, evaluation and limitations.
 
 ## Files
 

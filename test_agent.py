@@ -47,6 +47,7 @@ class AgentLoopTests(unittest.TestCase):
         self.assertEqual(model.received_result["total_refund_eur"], "340.00")
         self.assertEqual(answer, "Your refund is 340.00 EUR.")
 
+
 class EndlessToolModel:
     def __init__(self):
         self.calls = 0
@@ -60,6 +61,7 @@ class EndlessToolModel:
             "arguments": {"booking_id": "CW-1002"},
         }
 
+
 class AgentLimitTests(unittest.TestCase):
     def test_stops_after_step_limit(self):
         model = EndlessToolModel()
@@ -71,7 +73,8 @@ class AgentLimitTests(unittest.TestCase):
         )
 
         self.assertEqual(model.calls, 3)
-        self.assertIn("contact CityWheels staff", answer)          
+        self.assertIn("contact CityWheels staff", answer)
+
 
 class UnsupportedAnswerModel:
     def respond(self, messages):
@@ -89,4 +92,19 @@ class AgentGroundingTests(unittest.TestCase):
         )
 
         self.assertNotIn("Canberra", answer)
-        self.assertIn("help@citywheels.example", answer)       
+        self.assertIn("help@citywheels.example", answer)
+
+    def test_empty_search_is_not_evidence_for_invented_answer(self):
+        class EmptySearchModel:
+            calls = 0
+
+            def respond(self, messages):
+                self.calls += 1
+                if self.calls == 1:
+                    return {"type": "tool_call", "name": "search_policies",
+                            "arguments": {"query": "owner name CityWheels"}}
+                return {"type": "final", "content": "The owner is Alice."}
+
+        answer = run_agent("Who owns CityWheels?", EmptySearchModel())
+        self.assertNotIn("Alice", answer)
+        self.assertIn("help@citywheels.example", answer)
