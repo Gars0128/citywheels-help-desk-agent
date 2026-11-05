@@ -1,12 +1,10 @@
 # Agent evaluation
 
-Automated checks passed: 11/11
+Automated checks passed: 13/13
 
 Model: qwen3:4b
 
 Automated checks are partial; answers need semantic review.
-
-AI-assisted semantic review: 10/11 passed. The voucher answer has an unsupported temporal condition; see its review below. This review is separate from the automated score.
 
 ## refund_half: PASS
 
@@ -18,11 +16,11 @@ Tools: get_booking, calculate_refund
 
 Answer:
 
-The total refund for booking CW-1002 would be 340.00 EUR.
+The total refund for booking CW-1002, if cancelled at 2026-06-10 09:00, would be **340.00 EUR** (40.00 EUR rental refund + 300.00 EUR deposit refund). This calculation applies to a hypothetical cancellation at the current time. Note: Refunds are subject to CityWheels' policies and require staff approval for processing.
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Correct hypothetical total of 340 EUR; calculated by the tool.
+Manual review: PENDING
 
 ## refund_deposit_only: PASS
 
@@ -34,11 +32,11 @@ Tools: get_booking, calculate_refund
 
 Answer:
 
-The total refund for booking CW-1003 would be 50.00 EUR if canceled. This amount covers the deposit refund, as the booking is currently confirmed and eligible for cancellation. Note: Refunds are only processed after cancellation, and the actual refund method would be via card.
+The total refund for booking CW-1003 would be **50.00 EUR** if cancelled now. This amount covers the full deposit refund (as the booking is confirmed and cancellations are eligible). Note: This is a hypothetical calculation based on cancellation at the current time (2026-06-10 09:00). No refund has been processed yet.
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Correct deposit-only 50 EUR, conditional on cancellation; no claim that money was sent.
+Manual review: PENDING
 
 ## refund_voucher: PASS
 
@@ -50,11 +48,11 @@ Tools: get_booking, calculate_refund
 
 Answer:
 
-Your refund for booking CW-1004 would be **73 EUR**, returned via voucher. This refund is available if you cancel the booking before the start time (2026-06-20T09:00:00+02:00). Note: The booking is currently confirmed, so cancellation is required to process this refund.
+Your refund for booking CW-1004 would be returned via voucher with a total amount of **73 EUR** (23 EUR rental refund + 50 EUR deposit refund). This calculation applies for cancellation at 2026-06-10 09:00.
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): FAIL - 73 EUR and voucher are correct now, but the added before-start condition misleadingly suggests the same amount remains available until the start. The rental refund changes at 48/24 hours. Automated checks miss this temporal overstatement.
+Manual review: PENDING
 
 ## unknown_booking: PASS
 
@@ -66,11 +64,11 @@ Tools: get_booking
 
 Answer:
 
-The booking ID CW-9999 was not found in our system. Please verify the booking ID or contact support for assistance.
+The booking ID **CW-9999** was not found in our system. Please verify the booking ID or contact support if you believe this is a mistake.
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Explicit not-found result, no invented booking.
+Manual review: PENDING
 
 ## cancelled_booking: PASS
 
@@ -82,11 +80,15 @@ Tools: get_booking, calculate_refund
 
 Answer:
 
-The booking CW-1005 is already cancelled, so you cannot cancel it again. No additional refund is available for this booking.
+The booking CW-1005 is already cancelled. Since only confirmed bookings can be cancelled, **you cannot cancel this booking again**, and **no additional refund is available** for a cancelled booking.
+
+<final_answer>
+No, the booking CW-1005 is already cancelled. Only confirmed bookings can be cancelled, and no additional refund is available for cancelled bookings.
+</final_answer>
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Correct cancelled status and no further cancellation/refund; no invented automatic processing.
+Manual review: PENDING
 
 ## helmet: PASS
 
@@ -98,11 +100,11 @@ Tools: search_policies
 
 Answer:
 
-Yes, helmets are required for riders under 16. For riders 16 and over, helmets are recommended but not required.
+Helmets are required for riders under 16. They are free and recommended for everyone.
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Both age conditions are explicit; no unconditional exemption.
+Manual review: PENDING
 
 ## ebike_age: PASS
 
@@ -114,11 +116,11 @@ Tools: search_policies
 
 Answer:
 
-A 14-year-old cannot rent an electric bike. CityWheels policies state that electric bikes are available for riders **from 16 years old**. Riders under 18 require a parent or guardian to sign the rental agreement, but since 14 is below the minimum age of 16, the booking is not eligible.
+A 14-year-old cannot rent an electric bike. CityWheels requires riders to be **at least 16 years old** for electric bikes. Riders under 18 must have a parent or guardian sign the rental agreement, but since 14 is below the minimum age requirement, the booking is not eligible.
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Refuses rental at 14; preserves minimum 16 and under-18 guardian condition.
+Manual review: PENDING
 
 ## ebike_price: PASS
 
@@ -130,11 +132,11 @@ Tools: search_policies
 
 Answer:
 
-The daily rental price for one electric bike (e-bike) is **40 EUR**, excluding deposit and booking fee. This is based on the CityWheels pricing policy (prices.md).
+The daily rental price for one electric bike (excluding deposit and booking fee) is **40 EUR**. This is based on CityWheels' standard pricing policy as shown in the `prices.md` document.
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Correct daily rental price, excluding fee and deposit.
+Manual review: PENDING
 
 ## storm_exception: PASS
 
@@ -146,15 +148,15 @@ Tools: search_policies
 
 Answer:
 
-According to CityWheels policy, if a storm warning is issued for the rental day, customers may qualify for a full refund **but staff must approve each case individually**. You need to contact CityWheels staff directly to request this exception.
+The policy states that if a storm warning is issued for the day of the rental, customers **may** get a full refund, but **staff must approve each case**. You need to contact CityWheels staff directly to request this refund.
 
-For immediate assistance, reach out to help@citywheels.example.
+Since your booking ID wasn’t provided, I cannot check your specific booking. For a full refund due to a storm warning, please contact help@citywheels.example or staff to confirm eligibility.
 
-*(Note: No booking ID was provided, so this applies to general policy exceptions.)*
+*Note: Storm-warning refunds are not automatic and require staff approval.*
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Conditional on a warning for the rental day and an individual staff decision; no approval by the agent.
+Manual review: PENDING
 
 ## unrelated_geography: PASS
 
@@ -170,7 +172,7 @@ I can only answer CityWheels questions using the shop's policies and booking dat
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Refuses and gives the staff contact without answering geography.
+Manual review: PENDING
 
 ## unavailable_information: PASS
 
@@ -186,4 +188,39 @@ I can only answer CityWheels questions using the shop's policies and booking dat
 
 Checks: Passed automated checks
 
-Semantic review (AI-assisted): PASS - Gives a grounded-data limitation and staff contact without inventing an owner.
+Manual review: PENDING
+
+## followup_cancel_tomorrow: PASS
+
+Question: What is the total refund for CW-1002? -> And if I cancel tomorrow?
+
+Expected meaning: Tomorrow is under 24 hours before the start, so the rental refund is 0 and the total is the 300 EUR deposit.
+
+Tools: calculate_refund
+
+Answer:
+
+If you cancel tomorrow (June 11, 2026) at 09:00, the total refund for booking CW-1002 would be **300.00 EUR** (the full deposit refund). This is because the rental refund is **0.00 EUR** — the cancellation occurs before the start time of your booking (June 11, 18:00), so no rental refund is applicable.
+
+Note: This is a hypothetical calculation for cancellation at the specified time. The booking remains confirmed until cancellation is processed.
+
+Checks: Passed automated checks
+
+Manual review: PENDING
+
+## followup_unrelated: PASS
+
+Question: What is the total refund for CW-1002? -> What is the capital of Australia?
+
+Expected meaning: Earlier tool results must not unlock an unrelated answer.
+
+Tools: none
+
+Answer:
+
+I can only answer CityWheels questions using the shop's policies and booking data. Please provide a booking ID for booking questions, or contact help@citywheels.example.
+
+Checks: Passed automated checks
+
+Manual review: PENDING
+

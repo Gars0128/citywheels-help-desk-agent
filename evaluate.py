@@ -64,7 +64,10 @@ def main():
         failures = []
 
         try:
-            answer = run_agent(case["question"], model)
+            history = []
+            for earlier in case.get("setup", []):
+                run_agent(earlier, OllamaModel(), history=history)
+            answer = run_agent(case["question"], model, history=history)
             failures.extend(check_answer(case, answer, model.tool_calls))
 
         except Exception as error:
@@ -77,7 +80,7 @@ def main():
         report.extend([
             f"## {case['id']}: {status}",
             "",
-            f"Question: {case['question']}",
+            f"Question: {' -> '.join([*case.get('setup', []), case['question']])}",
             "",
             f"Expected meaning: {case['review']}",
             "",

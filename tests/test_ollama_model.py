@@ -32,6 +32,29 @@ class OllamaProtocolTests(unittest.TestCase):
             self.assertEqual(payload["messages"][3]["tool_name"], "get_booking")
             self.assertFalse(json.loads(payload["messages"][3]["content"])["found"])
 
+    def test_earlier_text_answer_is_sent_as_plain_message(self):
+        response = io.BytesIO(json.dumps({"message": {"content": "OK"}}).encode())
+        earlier = {"role": "assistant", "content": "Refund is 340 EUR."}
+        with patch("ollama_model.urlopen", return_value=response) as request:
+            OllamaModel().respond([earlier])
+            payload = json.loads(request.call_args.args[0].data)
+            self.assertEqual(payload["messages"][1], earlier)
+
+    def test_tool_call_printed_as_text_is_executed(self):
+        text = json.dumps({"name": "calculate_refund", "arguments": {"booking_id": "CW-1004"}})
+        response = io.BytesIO(json.dumps({"message": {"content": text}}).encode())
+        with patch("ollama_model.urlopen", return_value=response):
+            self.assertEqual(OllamaModel().respond([]), {
+                "type": "tool_call", "name": "calculate_refund",
+                "arguments": {"booking_id": "CW-1004"}})
+
+    def test_other_json_text_stays_a_final_answer(self):
+        for text in ['{"name": "delete_everything", "arguments": {}}', "42", "Refund is 73 EUR."]:
+            with self.subTest(text=text):
+                response = io.BytesIO(json.dumps({"message": {"content": text}}).encode())
+                with patch("ollama_model.urlopen", return_value=response):
+                    self.assertEqual(OllamaModel().respond([]), {"type": "final", "content": text})
+
     def test_all_calls_from_one_model_turn_are_executed(self):
         calls = [{"function": {"name": "get_booking", "arguments": {"booking_id": key}}}
                  for key in ["CW-1001", "CW-1002"]]

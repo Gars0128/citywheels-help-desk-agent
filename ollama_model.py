@@ -47,8 +47,30 @@ state the age condition. Do not assume that the customer is an adult.
 
 For hypothetical refund calculations, say the amount "would be refunded".
 Do not imply that a refund has been initiated or processed.
+The refund amount depends on when the booking is cancelled. If the customer
+asks about a future cancellation, pass cancel_at to calculate_refund. If they
+name only a day, use 09:00 that day and say which time you assumed.
+
+For follow-up questions, take the booking ID from the conversation and call the
+tools again. Do not answer from earlier results alone.
 Answer in the user's language.
 """
+
+
+def text_tool_calls(content):
+    # Local models sometimes print the tool call as text instead of using tool_calls.
+    try:
+        call = json.loads(content)
+    except ValueError:
+        return []
+
+    tool_names = {schema["function"]["name"] for schema in TOOL_SCHEMAS}
+
+    if (isinstance(call, dict) and call.get("name") in tool_names
+            and isinstance(call.get("arguments"), dict)):
+        return [{"function": {"name": call["name"], "arguments": call["arguments"]}}]
+
+    return []
 
 
 class OllamaModel:
@@ -69,7 +91,7 @@ class OllamaModel:
         ]
 
         for message in messages:
-            if message["role"] == "assistant":
+            if message["role"] == "assistant" and isinstance(message["content"], dict):
                 call = message["content"]
 
                 ollama_messages.append({
@@ -115,7 +137,7 @@ class OllamaModel:
 
         answer = result["message"]
 
-        for tool_call in answer.get("tool_calls", []):
+        for tool_call in answer.get("tool_calls") or text_tool_calls(answer["content"]):
             function = tool_call["function"]
 
             self.pending_calls.append({

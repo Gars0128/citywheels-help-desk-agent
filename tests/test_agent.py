@@ -84,6 +84,34 @@ class UnsupportedAnswerModel:
         }
 
 
+class AgentMemoryTests(unittest.TestCase):
+    def test_follow_up_sees_earlier_turn(self):
+        history = []
+        run_agent("How much for CW-1002?", FakeRefundModel(), history=history)
+
+        class FollowUpModel(FakeRefundModel):
+            def respond(self, messages):
+                self.seen = list(messages)
+                return super().respond(messages)
+
+        model = FollowUpModel()
+        answer = run_agent("And again?", model, history=history)
+
+        self.assertEqual(answer, "Your refund is 340.00 EUR.")
+        self.assertEqual(model.seen[0]["content"], "How much for CW-1002?")
+        self.assertEqual(history[3], {"role": "assistant", "content": "Your refund is 340.00 EUR."})
+        self.assertEqual(history[-1]["content"], answer)
+
+    def test_old_tool_results_do_not_ground_unrelated_follow_up(self):
+        history = []
+        run_agent("How much for CW-1002?", FakeRefundModel(), history=history)
+
+        answer = run_agent("What is the capital of Australia?", UnsupportedAnswerModel(), history=history)
+
+        self.assertNotIn("Canberra", answer)
+        self.assertEqual(history[-1]["content"], answer)
+
+
 class AgentGroundingTests(unittest.TestCase):
     def test_blocks_answer_without_tool_results(self):
         answer = run_agent(

@@ -19,13 +19,15 @@ def get_booking(booking_id: str) -> dict:
     return {"found": False, "booking_id": booking_id}
 
 
-def calculate_refund(booking_id: str) -> dict:
+def calculate_refund(booking_id: str, cancel_at: str | None = None) -> dict:
     result = get_booking(booking_id)
 
     if not result["found"]:
         return result
 
     booking = result["booking"]
+
+   
 
     if booking["status"] != "confirmed":
         return {
@@ -41,7 +43,31 @@ def calculate_refund(booking_id: str) -> dict:
         }
 
     start = datetime.fromisoformat(booking["start"])
-    hours_before_start = (start - CURRENT_TIME).total_seconds() / 3600
+    cancel_time = CURRENT_TIME
+
+    if cancel_at is not None:
+        try:
+            cancel_time = datetime.fromisoformat(cancel_at)
+        except (TypeError, ValueError):
+            return {"booking_id": booking_id, "error": "cancel_at must be an ISO 8601 date and time."}
+
+        if cancel_time.tzinfo is None:
+            cancel_time = cancel_time.replace(tzinfo=CURRENT_TIME.tzinfo)
+
+        if cancel_time < CURRENT_TIME:
+            return {"booking_id": booking_id, "error": "cancel_at cannot be in the past."}
+
+        if cancel_time >= start:
+            return {
+                "booking_id": booking_id,
+                "status": booking["status"],
+                "can_cancel": False,
+                "total_refund_eur": "0.00",
+                "cancel_at": cancel_time.isoformat(),
+                "reason": "The rental will have started by then, so it cannot be cancelled.",
+            }
+
+    hours_before_start = (start - cancel_time).total_seconds() / 3600
 
     if hours_before_start >= 48:
         rate = Decimal("1")
@@ -64,6 +90,7 @@ def calculate_refund(booking_id: str) -> dict:
         "total_refund_eur": str(total_refund.quantize(Decimal("0.01"))),
         "refund_method": booking["paid_with"],
         "currency": "EUR",
+        "cancel_at": cancel_time.isoformat(),
     }
 
 STOP_WORDS = set("""

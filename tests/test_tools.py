@@ -26,6 +26,25 @@ class CalculateRefundTests(unittest.TestCase):
 
 
     
+    def test_future_cancel_time_changes_refund(self):
+        for cancel_at in ["2026-06-11T09:00:00+02:00", "2026-06-11T09:00:00"]:
+            with self.subTest(cancel_at=cancel_at):
+                result = calculate_refund("CW-1002", cancel_at)
+
+                self.assertEqual(result["rental_refund_eur"], "0.00")
+                self.assertEqual(result["total_refund_eur"], "300.00")
+
+    def test_cancel_time_after_start_gets_nothing(self):
+        result = calculate_refund("CW-1003", "2026-06-11T09:00:00+02:00")
+
+        self.assertFalse(result["can_cancel"])
+        self.assertEqual(result["total_refund_eur"], "0.00")
+
+    def test_invalid_cancel_times_are_rejected(self):
+        for cancel_at in ["tomorrow", 123, "2026-06-09T09:00:00+02:00"]:
+            with self.subTest(cancel_at=cancel_at):
+                self.assertIn("error", calculate_refund("CW-1002", cancel_at))
+
     def test_refund_amounts(self):
         cases = [
             ("CW-1001", "40.00", "50.00", "90.00"),

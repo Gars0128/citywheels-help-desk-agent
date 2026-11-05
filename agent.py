@@ -10,30 +10,35 @@ TOOLS = {
 }
 
 
-def run_agent(question: str, model, max_steps: int = 8) -> str:
-    messages = [
-        {"role": "user", "content": question},
-    ]
+def run_agent(question: str, model, max_steps: int = 8, history: list | None = None) -> str:
+    messages = [] if history is None else history
+    turn_start = len(messages)
+    messages.append({"role": "user", "content": question})
+
+    def finish(answer: str) -> str:
+        messages.append({"role": "assistant", "content": answer})
+        return answer
 
     for _ in range(max_steps):
         response = model.respond(messages)
 
         if response["type"] == "final":
+            # Only this turn counts: old tool results must not ground an unrelated question.
             has_tool_result = any(
                 message["role"] == "tool"
                 and json.loads(message["content"]) != {"matches": []}
-                for message in messages
+                for message in messages[turn_start:]
             )
 
             if not has_tool_result:
-                return (
+                return finish(
                     "I can only answer CityWheels questions using "
                     "the shop's policies and booking data. "
                     "Please provide a booking ID for booking questions, "
                     "or contact help@citywheels.example."
                 )
 
-            return response["content"]
+            return finish(response["content"])
 
         if response["type"] != "tool_call":
             raise ValueError("Unknown model response type")
@@ -56,4 +61,4 @@ def run_agent(question: str, model, max_steps: int = 8) -> str:
             "content": json.dumps(tool_result, ensure_ascii=False),
         })
 
-    return "I could not finish the request. Please contact CityWheels staff."
+    return finish("I could not finish the request. Please contact CityWheels staff.")

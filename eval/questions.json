@@ -93,5 +93,23 @@
     "required": ["help@citywheels.example"],
     "forbidden": [],
     "review": "Owner name is unavailable; does not invent a name and directs to staff."
+  },
+  {
+    "id": "followup_cancel_tomorrow",
+    "setup": ["What is the total refund for CW-1002?"],
+    "question": "And if I cancel tomorrow?",
+    "expected_tool": "calculate_refund",
+    "required": ["300"],
+    "forbidden": [],
+    "review": "Tomorrow is under 24 hours before the start, so the rental refund is 0 and the total is the 300 EUR deposit."
+  },
+  {
+    "id": "followup_unrelated",
+    "setup": ["What is the total refund for CW-1002?"],
+    "question": "What is the capital of Australia?",
+    "expected_tool": null,
+    "required": [],
+    "forbidden": ["Canberra"],
+    "review": "Earlier tool results must not unlock an unrelated answer."
   }
 ]

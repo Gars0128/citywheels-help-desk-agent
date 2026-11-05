@@ -29,7 +29,8 @@ TOOL_SCHEMAS = [
         "function": {
             "name": "calculate_refund",
             "description": (
-                "Check cancellation eligibility and calculate the refund now. "
+                "Check cancellation eligibility and calculate the refund, now "
+                "or for a future cancellation time. "
                 "Use for all booking refund questions, including whether a "
                 "cancelled booking qualifies for another refund. "
                 "It only calculates a refund; it does not cancel the booking."
@@ -40,6 +41,13 @@ TOOL_SCHEMAS = [
                     "booking_id": {
                         "type": "string",
                         "description": "Booking ID, for example CW-1002.",
+                    },
+                    "cancel_at": {
+                        "type": "string",
+                        "description": (
+                            "Future cancellation time in ISO 8601, for example "
+                            "2026-06-11T09:00:00+02:00. Omit it for cancelling now."
+                        ),
                     },
                 },
                 "required": ["booking_id"],
